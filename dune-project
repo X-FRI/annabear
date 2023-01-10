@@ -5,22 +5,23 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github muqiuhan/annabear))
 
-(authors "Author Name")
+(authors "Muqiu Han")
 
-(maintainers "Maintainer Name")
+(maintainers "Muqiu Han")
 
-(license LICENSE)
+(license MIT)
 
-(documentation https://url/to/documentation)
+(documentation https://github.com/muqiuhan/annabear)
 
 (package
  (name annabear)
- (synopsis "A short synopsis")
- (description "A longer description")
- (depends ocaml dune)
+ (synopsis "parser combinators library")
+ (allow_empty)
+ (description "parser combinators library")
+ (depends ocaml dune core alcotest)
  (tags
-  (topics "to describe" your project)))
+  (parser "parser combinator")))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/dune-files.html#dune-project

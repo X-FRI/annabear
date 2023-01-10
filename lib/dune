@@ -1,2 +1,3 @@
 (library
- (name annabear))
+ (name annabear)
+ (libraries core))
