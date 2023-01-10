@@ -1,2 +1,3 @@
 (test
- (name annabear))
+ (name annabear)
+ (libraries alcotest annabear))
