@@ -22,21 +22,12 @@
 (* SOFTWARE.                                                                      *)
 (**********************************************************************************)
 
-module Char = struct
-  include Core.Char
-  open Utils
+open Core
 
-  type result = (char, string) Result.t
+(** The return type of all parsing functions
+    'a is the output data type
+    'b is the input data type
+    string is the error message *)
+type ('a, 'b) parse_result = (('a * 'b), string) result
 
-  let parse (char_to_match : char) : string -> result =
-    let inner_fn (str : string) : result =
-      if String.is_empty str
-      then Error "No more input"
-      else if String.get str 0 |> equal char_to_match
-      then Ok (char_to_match, String.remaining str)
-      else
-        Error (Format.sprintf "Expecting '%c'. Got '%c'" char_to_match (String.get str 0))
-    in
-    inner_fn
-  ;;
-end
+type ('a, 'b) t = ('a, 'b) parse_result

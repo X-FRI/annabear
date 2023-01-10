@@ -22,21 +22,13 @@
 (* SOFTWARE.                                                                      *)
 (**********************************************************************************)
 
-module Char = struct
-  include Core.Char
-  open Utils
+open Core
 
-  type result = (char, string) Result.t
+module String = struct
+  include Core.String
 
-  let parse (char_to_match : char) : string -> result =
-    let inner_fn (str : string) : result =
-      if String.is_empty str
-      then Error "No more input"
-      else if String.get str 0 |> equal char_to_match
-      then Ok (char_to_match, String.remaining str)
-      else
-        Error (Format.sprintf "Expecting '%c'. Got '%c'" char_to_match (String.get str 0))
-    in
-    inner_fn
+  (** Get the remaining characters of a string expect the first character. *)
+  let remaining (str : string) : string =
+    StringLabels.sub str ~pos:1 ~len:(String.length str - 1)
   ;;
 end
