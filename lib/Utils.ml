@@ -27,8 +27,22 @@ open Core
 module String = struct
   include Core.String
 
-  (** Get the remaining characters of a string expect the first character. *)
+  (** Get the remaining string without first character *)
   let remaining (str : string) : string =
     StringLabels.sub str ~pos:1 ~len:(String.length str - 1)
+  ;;
+
+  (** Get the remaining string without prefix string *)
+  let remaining_prefix (prefix : string) (str : string) : string =
+    if String.is_prefix str ~prefix
+    then (
+      let prefix_length = String.length prefix in
+      StringLabels.sub str ~pos:prefix_length ~len:(String.length str - prefix_length))
+    else
+      failwith
+        (Format.sprintf
+           "%s.%s -> The provided prefix does not match the target string"
+           __MODULE__
+           __FUNCTION__)
   ;;
 end

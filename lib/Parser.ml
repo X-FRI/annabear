@@ -54,9 +54,19 @@ let or_else (parser_a : ('result, 'data) parser) (parser_b : ('result, 'data) pa
   Parser inner_fn
 ;;
 
+let choise (list_of_parsers : ('result, 'data) parser list) : ('result, 'data) parser =
+  Core.List.reduce_exn ~f:or_else list_of_parsers
+;;
+
+let any_of (list_of_datas : 'a list) (data_parse_fn : 'data -> ('result, 'data) parser)
+  : ('result, 'data) parser
+  =
+  list_of_datas |> Core.List.map ~f:data_parse_fn |> choise
+;;
+
 module O = struct
-  let ( &>> ) = and_then
-  let ( |>> ) = or_else
+  let ( <&> ) = and_then
+  let ( <|> ) = or_else
 end
 
 module Char = struct
@@ -74,6 +84,25 @@ module Char = struct
       then Ok (char_to_match, String.remaining str)
       else
         Error (Format.sprintf "Expecting '%c'. Got '%c'" char_to_match (String.get str 0))
+    in
+    Parser inner_fn
+  ;;
+end
+
+module String = struct
+  include Core.String
+  open Utils
+
+  type result = string
+  type data = string
+
+  let parse (str_to_match : result) : (result, data) parser =
+    let inner_fn (str : data) : (result, data) Result.t =
+      if String.is_empty str
+      then Error "No more input"
+      else if String.is_prefix str ~prefix:str_to_match
+      then Ok (str_to_match, String.remaining_prefix str_to_match str)
+      else Error (Format.sprintf "Expecting '%s'. Got '%s'" str_to_match str)
     in
     Parser inner_fn
   ;;
