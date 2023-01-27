@@ -1,3 +1,3 @@
 (test
- (name annabear)
+ (name Test_Annabear)
  (libraries alcotest annabear))
