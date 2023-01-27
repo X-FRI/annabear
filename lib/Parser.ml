@@ -58,7 +58,7 @@ let choise (list_of_parsers : ('result, 'data) parser list) : ('result, 'data) p
   Core.List.reduce_exn ~f:or_else list_of_parsers
 ;;
 
-let any_of (list_of_datas : 'a list) (data_parse_fn : 'data -> ('result, 'data) parser)
+let any_of (list_of_datas : 'a list) (data_parse_fn : 'result -> ('result, 'data) parser)
   : ('result, 'data) parser
   =
   list_of_datas |> Core.List.map ~f:data_parse_fn |> choise
@@ -67,11 +67,13 @@ let any_of (list_of_datas : 'a list) (data_parse_fn : 'data -> ('result, 'data) 
 module O = struct
   let ( <&> ) = and_then
   let ( <|> ) = or_else
+  let ( >>= ) = any_of
 end
 
 module Char = struct
-  include Core.Char
+  open O
   open Utils
+  include Core.Char
 
   type result = char
   type data = string
@@ -87,6 +89,13 @@ module Char = struct
     in
     Parser inner_fn
   ;;
+
+  module List = struct
+    include List
+
+    let parse_lowercase = Char.List.lowercase_char_list >>= parse
+    let parse_uppercase = Char.List.uppercase_char_list >>= parse
+  end
 end
 
 module String = struct

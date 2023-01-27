@@ -64,11 +64,42 @@ module Test_Parser = struct
          | Error msg -> failwith msg)
     ;;
 
+    module List = struct
+      open List
+
+      let test_parse_lowercase () =
+        (check bool)
+          "Success parse"
+          true
+          (match run parse_lowercase "hello" with
+           | Ok _ -> true
+           | Error msg -> failwith msg)
+      ;;
+
+      let test_parse_uppercase () =
+        (check bool)
+          "Success parse"
+          true
+          (match run parse_uppercase "HELLO" with
+           | Ok _ -> true
+           | Error msg -> failwith msg)
+      ;;
+
+      let tests =
+        [ test_case "Char.List.parse_lowercase" `Quick test_parse_lowercase
+        ; test_case "Char.List.parse_uppercase" `Quick test_parse_uppercase
+        ]
+      ;;
+    end
+
     let tests =
-      [ test_case "Char.parse" `Quick test_parse
-      ; test_case "Char.and_then" `Quick test_and_then
-      ; test_case "Char.or_else" `Quick test_or_else
-      ]
+      Core.List.concat
+        [ [ test_case "Char.parse" `Quick test_parse
+          ; test_case "Char.and_then" `Quick test_and_then
+          ; test_case "Char.or_else" `Quick test_or_else
+          ]
+        ; List.tests
+        ]
     ;;
   end
 
