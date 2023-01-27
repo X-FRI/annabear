@@ -90,12 +90,8 @@ module Char = struct
     Parser inner_fn
   ;;
 
-  module List = struct
-    include List
-
-    let parse_lowercase = Char.List.lowercase_char_list >>= parse
-    let parse_uppercase = Char.List.uppercase_char_list >>= parse
-  end
+  let parse_lowercase = Char.lowercase_char_list >>= parse
+  let parse_uppercase = Char.uppercase_char_list >>= parse
 end
 
 module String = struct

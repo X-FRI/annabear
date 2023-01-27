@@ -27,15 +27,13 @@ open Core
 module Char = struct
   include Char
 
-  module List = struct      
-    let lowercase_char_list =
-      String.init 26 ~f:(fun n -> Char.of_int_exn (n + 97)) |> String.to_list
-    ;;
+  let lowercase_char_list =
+    String.init 26 ~f:(fun n -> Char.of_int_exn (n + 97)) |> String.to_list
+  ;;
 
-    let uppercase_char_list =
-      String.init 26 ~f:(fun n -> Char.of_int_exn (n + 65)) |> String.to_list
-    ;;
-  end
+  let uppercase_char_list =
+    String.init 26 ~f:(fun n -> Char.of_int_exn (n + 65)) |> String.to_list
+  ;;
 end
 
 module String = struct
