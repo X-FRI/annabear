@@ -40,16 +40,28 @@ module Test_Char = struct
     (check bool) "Success parse" true (( --> ) (fun () -> run parse_digit "1234567890"))
   ;;
 
+  let parse_three_digit_as_str =
+    Annabear.Parser.O.(
+      (fun ((c1, c2), c3) -> Core.String.of_char_list [ c1; c2; c3 ])
+      <:> (parse_digit <&> parse_digit <&> parse_digit))
+  ;;
+
+  let parse_three_digit_as_int =
+    Annabear.Parser.O.(int_of_string <:> parse_three_digit_as_str)
+  ;;
+
   let test_parse_three_digit_as_str () =
-    let parse_three_digit_as_str =
-      Annabear.Parser.O.(
-        (fun ((c1, c2), c3) -> Core.String.of_char_list [ c1; c2; c3 ])
-        <:> (parse_digit <&> parse_digit <&> parse_digit))
-    in
     (check bool)
       "Success parse"
       true
       (( --> ) (fun () -> run parse_three_digit_as_str "1234567890"))
+  ;;
+
+  let test_parse_three_digit_as_int () =
+    (check bool)
+      "Success parse"
+      true
+      (( --> ) (fun () -> run parse_three_digit_as_int "1234567890"))
   ;;
 
   let tests =
@@ -59,6 +71,8 @@ module Test_Char = struct
     ; test_case "Char.parse_lowercase" `Quick test_parse_lowercase
     ; test_case "Char.parse_uppercase" `Quick test_parse_uppercase
     ; test_case "Char.parse_digit" `Quick test_parse_digit
+    ; test_case "Char.parse_three_digit_as_str" `Quick test_parse_three_digit_as_str
+    ; test_case "Char.parse_three_digit_as_int" `Quick test_parse_three_digit_as_int
     ]
   ;;
 end
