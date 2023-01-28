@@ -22,15 +22,15 @@
 (* SOFTWARE.                                                                      *)
 (**********************************************************************************)
 
-type ('result, 'data) parser = Parser of ('data -> ('result, 'data) Result.t)
+type ('a, 'b) parser = Parser of ('b -> ('a, 'b) Result.t)
 
-let run (parser : ('result, 'data) parser) (input : 'data) : ('result, 'data) Result.t =
+let run (parser : ('a, 'b) parser) (input : 'b) : ('a, 'b) Result.t =
   let (Parser inner_fn) = parser in
   inner_fn input
 ;;
 
-let and_then (parser_a : ('result, 'data) parser) (parser_b : ('result, 'data) parser)
-  : ('result * 'result, 'data) parser
+let and_then (parser_a : ('a, 'b) parser) (parser_b : ('c, 'b) parser)
+  : ('a * 'c, 'b) parser
   =
   let inner_fn input =
     match run parser_a input with
@@ -43,9 +43,7 @@ let and_then (parser_a : ('result, 'data) parser) (parser_b : ('result, 'data) p
   Parser inner_fn
 ;;
 
-let or_else (parser_a : ('result, 'data) parser) (parser_b : ('result, 'data) parser)
-  : ('result, 'data) parser
-  =
+let or_else (parser_a : ('a, 'b) parser) (parser_b : ('a, 'b) parser) : ('a, 'b) parser =
   let inner_fn input =
     match run parser_a input with
     | Ok result -> Ok result
@@ -54,20 +52,31 @@ let or_else (parser_a : ('result, 'data) parser) (parser_b : ('result, 'data) pa
   Parser inner_fn
 ;;
 
-let choise (list_of_parsers : ('result, 'data) parser list) : ('result, 'data) parser =
+let choise (list_of_parsers : ('a, 'b) parser list) : ('a, 'b) parser =
   Core.List.reduce_exn ~f:or_else list_of_parsers
 ;;
 
-let any_of (list_of_datas : 'a list) (data_parse_fn : 'result -> ('result, 'data) parser)
-  : ('result, 'data) parser
+let any_of (list_of_datas : 'a list) (data_parse_fn : 'a -> ('a, 'b) parser)
+  : ('a, 'b) parser
   =
   list_of_datas |> Core.List.map ~f:data_parse_fn |> choise
+;;
+
+let map (f : 'a -> 'b) (parser : ('c, 'd) parser) : ('e, 'f) parser =
+  let inner_fn input =
+    match run parser input with
+    | Ok (value, remaining) -> Ok (f value, remaining)
+    | Error msg -> Error msg
+  in
+  Parser inner_fn
 ;;
 
 module O = struct
   let ( <&> ) = and_then
   let ( <|> ) = or_else
   let ( >>= ) = any_of
+  let ( <:> ) = map
+  let ( |>> ) (x : ('c, 'd) parser) (f : 'a -> 'b) : ('e, 'f) parser = map f x
 end
 
 module Char = struct
@@ -90,9 +99,9 @@ module Char = struct
     Parser inner_fn
   ;;
 
-  let parse_lowercase : ('result, 'data) parser = Char.lowercase_char_list >>= parse
-  let parse_uppercase : ('result, 'data) parser = Char.uppercase_char_list >>= parse
-  let parse_digit : ('result, 'data) parser = Char.digit_char_list >>= parse
+  let parse_lowercase : ('a, 'b) parser = Char.lowercase_char_list >>= parse
+  let parse_uppercase : ('a, 'b) parser = Char.uppercase_char_list >>= parse
+  let parse_digit : ('a, 'b) parser = Char.digit_char_list >>= parse
 end
 
 module String = struct

@@ -25,6 +25,6 @@
 open Core
 
 (** The return type of all parsing functions, string is the error message *)
-type ('result, 'data) parse_result = ('result * 'data, string) result
+type ('a, 'b) parse_result = ('a * 'b, string) result
 
-type ('result, 'data) t = ('result, 'data) parse_result
+type ('a, 'b) t = ('a, 'b) parse_result
