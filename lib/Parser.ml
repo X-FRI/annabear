@@ -90,8 +90,9 @@ module Char = struct
     Parser inner_fn
   ;;
 
-  let parse_lowercase = Char.lowercase_char_list >>= parse
-  let parse_uppercase = Char.uppercase_char_list >>= parse
+  let parse_lowercase : ('result, 'data) parser = Char.lowercase_char_list >>= parse
+  let parse_uppercase : ('result, 'data) parser = Char.uppercase_char_list >>= parse
+  let parse_digit : ('result, 'data) parser = Char.digit_char_list >>= parse
 end
 
 module String = struct

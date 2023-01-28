@@ -34,6 +34,10 @@ module Char = struct
   let uppercase_char_list =
     String.init 26 ~f:(fun n -> Char.of_int_exn (n + 65)) |> String.to_list
   ;;
+
+  let digit_char_list =
+    String.init 10 ~f:(fun n -> Char.of_int_exn (n + 48)) |> String.to_list
+  ;;
 end
 
 module String = struct
