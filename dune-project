@@ -17,10 +17,9 @@
 
 (package
  (name annabear)
- (synopsis "parser combinators library")
- (allow_empty)
- (description "parser combinators library")
- (depends ocaml dune core alcotest)
+ (synopsis "OCaml parser combinators library")
+ (description "OCaml parser combinators library")
+ (depends ocaml dune omtl)
  (tags
   (parser "parser combinator")))
 
