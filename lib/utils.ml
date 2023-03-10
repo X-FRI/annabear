@@ -22,6 +22,8 @@
 (* SOFTWARE.                                                                      *)
 (**********************************************************************************)
 
+open Core
+
 module String = struct
   include String
 
@@ -29,9 +31,9 @@ module String = struct
       and returns a string containing the remaining characters.
       E.g: let (first_char, remaining) = remaining "foo" *)
   let remaining (str : string) : char * string =
-    match str |> to_seq |> List.of_seq with
+    match str |> to_list with
     | [ last_char ] -> last_char, ""
-    | first_char :: remaining -> first_char, remaining |> List.to_seq |> String.of_seq
+    | first_char :: remaining -> first_char, remaining |> of_char_list
     | _ -> failwith "String is empty!"
   ;;
 end

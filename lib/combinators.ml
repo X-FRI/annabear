@@ -24,15 +24,16 @@
 
 open Types
 open Parsers
+open Core
 
 let and_then (x : 'a parser) (y : 'a parser) : ('a * 'a) parser =
   let inner (input : string) : (('a * 'a) * string) parse_result =
     match run x input with
     | Failure err -> Failure err
     | Success (x_result, x_remaining) ->
-      match run y x_remaining with
+      (match run y x_remaining with
        | Failure err -> Failure err
-       | Success (y_result, y_remaining) -> Success ((x_result, y_result), y_remaining)
+       | Success (y_result, y_remaining) -> Success ((x_result, y_result), y_remaining))
   in
   Parser inner
 ;;
@@ -45,3 +46,6 @@ let or_else (x : 'a parser) (y : 'a parser) : 'a parser =
   in
   Parser inner
 ;;
+
+let choise (parsers : 'a parser list) : 'a parser = List.reduce_exn parsers ~f:or_else
+let any_of (chars : char list) : 'a parser = List.map ~f:parse_char chars |> choise

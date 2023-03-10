@@ -22,12 +22,13 @@
 (* SOFTWARE.                                                                      *)
 (**********************************************************************************)
 
+open Core
 open Types
 open Utils
 
 let parse_char (char_to_match : char) : char parser =
   let inner (str : string) : ('a * string) parse_result =
-    if String.equal str String.empty
+    if String.is_empty str
     then Failure "No more input"
     else (
       let first_char, remaining = String.remaining str in

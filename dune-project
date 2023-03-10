@@ -16,6 +16,7 @@
 (documentation https://github.com/muqiuhan/annabear)
 
 (package
+ (allow_empty)
  (name annabear)
  (synopsis "OCaml parser combinators library")
  (description "OCaml parser combinators library")
