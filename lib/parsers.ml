@@ -39,8 +39,7 @@ let parse_char (char_to_match : char) : char parser =
   Parser inner
 ;;
 
-
-let run (parser : 'a parser) (input : string) : ('a * string) parse_result=
+let run (parser : 'a parser) (input : string) : ('a * string) parse_result =
   let (Parser inner) = parser in
   inner input
 ;;

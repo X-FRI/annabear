@@ -2,6 +2,10 @@ open Core
 open Annabear
 open Alcotest
 
+let parseDigit =
+  Combinators.any_of (List.init 10 ~f:(fun n -> Char.of_int (n + 48) |> Option.value_exn))
+;;
+
 let test_parse_char () =
   let parse_a = Parsers.parse_char 'A' in
   let _success_parse =
@@ -22,8 +26,9 @@ let test_and_then () =
   let parse_b = Parsers.parse_char 'B' in
   let _success_parse =
     match Parsers.run (Combinators.and_then parse_a parse_b) "ABC" with
-    | Success _ -> ()
+    | Success (('A', 'B'), "C") -> ()
     | Failure msg -> failwith msg
+    | _ -> failwith "_failure_parse"
   in
   let _failure_parse =
     match Parsers.run (Combinators.and_then parse_a parse_b) "CBA" with
@@ -103,6 +108,34 @@ let test_any_of () =
   ()
 ;;
 
+let test_map () =
+  match
+    Parsers.run
+      Combinators.O.(
+        parseDigit
+        >>> parseDigit
+        >>> parseDigit
+        |-> (fun ((c1, c2), c3) -> String.of_char_list [ c1; c2; c3 ])
+        |-> Int.of_string)
+      "123A"
+  with
+  | Success (123, "A") -> ()
+  | Failure msg -> failwith msg
+  | _ -> failwith "_failure_parse"
+;;
+
+let test_sequence () =
+  match
+    Parsers.run
+      (Combinators.sequence
+         [ Parsers.parse_char 'a'; Parsers.parse_char 'b'; Parsers.parse_char 'c' ])
+      "abcd"
+  with
+  | Success ([ 'a'; 'b'; 'c' ], "d") -> ()
+  | Failure msg -> failwith msg
+  | _ -> failwith "_failure_parse"
+;;
+
 let _ =
   run
     "Annabear"
@@ -111,6 +144,8 @@ let _ =
         ; test_case "and_then" `Quick test_and_then
         ; test_case "or_else" `Quick test_or_else
         ; test_case "any_of" `Quick test_any_of
+        ; test_case "map" `Quick test_map
+        ; test_case "sequence" `Quick test_sequence
         ] )
     ]
 ;;

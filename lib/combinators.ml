@@ -26,8 +26,8 @@ open Types
 open Parsers
 open Core
 
-let and_then (x : 'a parser) (y : 'a parser) : ('a * 'a) parser =
-  let inner (input : string) : (('a * 'a) * string) parse_result =
+let and_then x y =
+  let inner input =
     match run x input with
     | Failure err -> Failure err
     | Success (x_result, x_remaining) ->
@@ -38,8 +38,8 @@ let and_then (x : 'a parser) (y : 'a parser) : ('a * 'a) parser =
   Parser inner
 ;;
 
-let or_else (x : 'a parser) (y : 'a parser) : 'a parser =
-  let inner (input : string) : ('a * string) parse_result =
+let or_else x y =
+  let inner input =
     match run x input with
     | Failure _ -> run y input
     | Success x_result -> Success x_result
@@ -47,5 +47,46 @@ let or_else (x : 'a parser) (y : 'a parser) : 'a parser =
   Parser inner
 ;;
 
-let choise (parsers : 'a parser list) : 'a parser = List.reduce_exn parsers ~f:or_else
-let any_of (chars : char list) : 'a parser = List.map ~f:parse_char chars |> choise
+let choise x = List.reduce_exn x ~f:or_else
+let any_of chars = List.map ~f:parse_char chars |> choise
+
+let map ~f x =
+  let inner input =
+    match run x input with
+    | Success (value, remaining) -> Success (f value, remaining)
+    | Failure err -> Failure err
+  in
+  Parser inner
+;;
+
+let return x =
+  let inner input = Success (x, input) in
+  Parser inner
+;;
+
+let apply ~f x = and_then f x |> map ~f:(fun (f, x) -> f x)
+
+module O = struct
+  let ( >>> ) = and_then
+  let ( <|> ) = or_else
+  let ( <-> ) f x = map ~f x
+  let ( |-> ) (x : 'a parser) (f : 'a -> 'b) : 'b parser = map ~f x
+  let ( --> ) f x = apply ~f x
+end
+
+let lift2 f x y = O.(return f --> x --> y)
+
+module Int = struct
+  let add = lift2 ( + )
+end
+
+module String = struct
+  let starts_with = lift2 (fun prefix str -> String.is_prefix ~prefix str)
+end
+
+let rec sequence parsers =
+  let cons = lift2 (fun h t -> h :: t) in
+  match parsers with
+  | [] -> return []
+  | h :: t -> cons h (sequence t)
+;;
