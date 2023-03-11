@@ -23,6 +23,7 @@
 (**********************************************************************************)
 
 open Core
+open Types
 
 module String = struct
   include String
@@ -37,3 +38,21 @@ module String = struct
     | _ -> failwith "String is empty!"
   ;;
 end
+
+let parse_char char_to_match =
+  let inner str =
+    if String.is_empty str
+    then Failure "No more input"
+    else (
+      let first_char, remaining = String.remaining str in
+      if Char.equal first_char char_to_match
+      then Success (char_to_match, remaining)
+      else Failure (Format.sprintf "Expecting '%c'. Got '%c'" char_to_match first_char))
+  in
+  Parser inner
+;;
+
+let run (parser : 'a parser) (input : string) : ('a * string) parse_result =
+  let (Parser inner) = parser in
+  inner input
+;;

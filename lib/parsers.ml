@@ -23,23 +23,26 @@
 (**********************************************************************************)
 
 open Core
-open Types
 open Utils
 
-let parse_char (char_to_match : char) : char parser =
-  let inner (str : string) : ('a * string) parse_result =
-    if String.is_empty str
-    then Failure "No more input"
-    else (
-      let first_char, remaining = String.remaining str in
-      if Char.equal first_char char_to_match
-      then Success (char_to_match, remaining)
-      else Failure (Format.sprintf "Expecting '%c'. Got '%c'" char_to_match first_char))
-  in
-  Parser inner
+let parse_digit =
+  Combinators.any_of (List.init 10 ~f:(fun n -> Char.of_int (n + 48) |> Option.value_exn))
 ;;
 
-let run (parser : 'a parser) (input : string) : ('a * string) parse_result =
-  let (Parser inner) = parser in
-  inner input
+let parse_string str =
+  str
+  |> String.to_list
+  |> List.map ~f:parse_char
+  |> Combinators.sequence
+  |> Combinators.map ~f:String.of_char_list
+;;
+
+let parse_char = parse_char
+
+let rec parse_zero_or_more x input =
+  match run x input with
+  | Failure _ -> [], input
+  | Success (h, t) ->
+    let subsequent, remaining = parse_zero_or_more x t in
+    h :: subsequent, remaining
 ;;

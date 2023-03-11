@@ -2,19 +2,15 @@ open Core
 open Annabear
 open Alcotest
 
-let parseDigit =
-  Combinators.any_of (List.init 10 ~f:(fun n -> Char.of_int (n + 48) |> Option.value_exn))
-;;
-
 let test_parse_char () =
   let parse_a = Parsers.parse_char 'A' in
   let _success_parse =
-    match Parsers.run parse_a "ABC" with
+    match Utils.run parse_a "ABC" with
     | Success _ -> ()
     | Failure msg -> failwith msg
   in
   let _failure_parse =
-    match Parsers.run parse_a "BC" with
+    match Utils.run parse_a "BC" with
     | Success _ -> failwith "_failure_parse"
     | Failure _ -> ()
   in
@@ -25,13 +21,13 @@ let test_and_then () =
   let parse_a = Parsers.parse_char 'A' in
   let parse_b = Parsers.parse_char 'B' in
   let _success_parse =
-    match Parsers.run (Combinators.and_then parse_a parse_b) "ABC" with
+    match Utils.run (Combinators.and_then parse_a parse_b) "ABC" with
     | Success (('A', 'B'), "C") -> ()
     | Failure msg -> failwith msg
     | _ -> failwith "_failure_parse"
   in
   let _failure_parse =
-    match Parsers.run (Combinators.and_then parse_a parse_b) "CBA" with
+    match Utils.run (Combinators.and_then parse_a parse_b) "CBA" with
     | Success _ -> failwith "_failure_parse"
     | Failure _ -> ()
   in
@@ -43,19 +39,19 @@ let test_or_else () =
   let parse_b = Parsers.parse_char 'B' in
   let _success_parse =
     let _ =
-      match Parsers.run (Combinators.or_else parse_a parse_b) "ABC" with
+      match Utils.run (Combinators.or_else parse_a parse_b) "ABC" with
       | Success _ -> ()
       | Failure msg -> failwith msg
     in
     let _ =
-      match Parsers.run (Combinators.or_else parse_a parse_b) "BAC" with
+      match Utils.run (Combinators.or_else parse_a parse_b) "BAC" with
       | Success _ -> ()
       | Failure msg -> failwith msg
     in
     ()
   in
   let _failure_parse =
-    match Parsers.run (Combinators.or_else parse_a parse_b) "CBA" with
+    match Utils.run (Combinators.or_else parse_a parse_b) "CBA" with
     | Success _ -> failwith "_failure_parse"
     | Failure _ -> ()
   in
@@ -65,7 +61,7 @@ let test_or_else () =
 let test_any_of () =
   let _parse_lower_case =
     match
-      Parsers.run
+      Utils.run
         (Combinators.any_of
            (List.init 26 ~f:(fun n -> Char.of_int (n + 97) |> Option.value_exn)))
         "aBC"
@@ -76,7 +72,7 @@ let test_any_of () =
   in
   let _parse_lower_case_failure =
     match
-      Parsers.run
+      Utils.run
         (Combinators.any_of
            (List.init 26 ~f:(fun n -> Char.of_int (n + 97) |> Option.value_exn)))
         "ABC"
@@ -86,7 +82,7 @@ let test_any_of () =
   in
   let _parse_digit =
     match
-      Parsers.run
+      Utils.run
         (Combinators.any_of
            (List.init 10 ~f:(fun n -> Char.of_int (n + 48) |> Option.value_exn)))
         "1aBC"
@@ -97,7 +93,7 @@ let test_any_of () =
   in
   let _parse_digit_failure =
     match
-      Parsers.run
+      Utils.run
         (Combinators.any_of
            (List.init 10 ~f:(fun n -> Char.of_int (n + 48) |> Option.value_exn)))
         "|ABC"
@@ -110,11 +106,11 @@ let test_any_of () =
 
 let test_map () =
   match
-    Parsers.run
+    Utils.run
       Combinators.O.(
-        parseDigit
-        >>> parseDigit
-        >>> parseDigit
+        Parsers.parse_digit
+        >>> Parsers.parse_digit
+        >>> Parsers.parse_digit
         |-> (fun ((c1, c2), c3) -> String.of_char_list [ c1; c2; c3 ])
         |-> Int.of_string)
       "123A"
@@ -126,7 +122,7 @@ let test_map () =
 
 let test_sequence () =
   match
-    Parsers.run
+    Utils.run
       (Combinators.sequence
          [ Parsers.parse_char 'a'; Parsers.parse_char 'b'; Parsers.parse_char 'c' ])
       "abcd"
@@ -137,14 +133,7 @@ let test_sequence () =
 ;;
 
 let test_parse_string () =
-  let parse_string str =
-    str
-    |> String.to_list
-    |> List.map ~f:Parsers.parse_char
-    |> Combinators.sequence
-    |> Combinators.map ~f:String.of_char_list
-  in
-  match Parsers.run (parse_string "ABC") "ABCDE" with
+  match Utils.run (Parsers.parse_string "ABC") "ABCDE" with
   | Success ("ABC", "DE") -> ()
   | Failure msg -> failwith msg
   | _ -> failwith "_failure_parse"

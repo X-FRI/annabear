@@ -23,8 +23,8 @@
 (**********************************************************************************)
 
 open Types
-open Parsers
 open Core
+open Utils
 
 let and_then x y =
   let inner input =
@@ -70,7 +70,7 @@ module O = struct
   let ( >>> ) = and_then
   let ( <|> ) = or_else
   let ( <-> ) f x = map ~f x
-  let ( |-> ) (x : 'a parser) (f : 'a -> 'b) : 'b parser = map ~f x
+  let ( |-> ) x f = map ~f x
   let ( --> ) f x = apply ~f x
 end
 
