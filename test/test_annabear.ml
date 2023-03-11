@@ -136,6 +136,20 @@ let test_sequence () =
   | _ -> failwith "_failure_parse"
 ;;
 
+let test_parse_string () =
+  let parse_string str =
+    str
+    |> String.to_list
+    |> List.map ~f:Parsers.parse_char
+    |> Combinators.sequence
+    |> Combinators.map ~f:String.of_char_list
+  in
+  match Parsers.run (parse_string "ABC") "ABCDE" with
+  | Success ("ABC", "DE") -> ()
+  | Failure msg -> failwith msg
+  | _ -> failwith "_failure_parse"
+;;
+
 let _ =
   run
     "Annabear"
@@ -146,6 +160,7 @@ let _ =
         ; test_case "any_of" `Quick test_any_of
         ; test_case "map" `Quick test_map
         ; test_case "sequence" `Quick test_sequence
+        ; test_case "parse string" `Quick test_parse_string
         ] )
     ]
 ;;
