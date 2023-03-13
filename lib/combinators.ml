@@ -103,3 +103,14 @@ let many parser =
   let inner input = Success (parse_zero_or_more parser input) in
   Parser inner
 ;;
+
+let many1 parser =
+  let inner input =
+    match Utils.run parser input with
+    | Failure err -> Failure err
+    | Success (h, t) ->
+      let subsequent, remaining = parse_zero_or_more parser t in
+      Success (h :: subsequent, remaining)
+  in
+  Parser inner
+;;
