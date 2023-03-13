@@ -139,6 +139,13 @@ let test_parse_string () =
   | _ -> failwith "_failure_parse"
 ;;
 
+let test_many () =
+  match Utils.run (Combinators.many (Parsers.parse_char 'A')) "AAABCD" with
+  | Success ([ 'A'; 'A'; 'A' ], "BCD") -> ()
+  | Failure msg -> failwith msg
+  | _ -> failwith "_parse_failure"
+;;
+
 let _ =
   run
     "Annabear"
@@ -150,6 +157,7 @@ let _ =
         ; test_case "map" `Quick test_map
         ; test_case "sequence" `Quick test_sequence
         ; test_case "parse string" `Quick test_parse_string
+        ; test_case "many" `Quick test_many
         ] )
     ]
 ;;

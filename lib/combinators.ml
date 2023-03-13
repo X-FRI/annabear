@@ -90,3 +90,16 @@ let rec sequence parsers =
   | [] -> return []
   | h :: t -> cons h (sequence t)
 ;;
+
+let rec parse_zero_or_more x input =
+  match run x input with
+  | Failure _ -> [], input
+  | Success (h, t) ->
+    let subsequent, remaining = parse_zero_or_more x t in
+    h :: subsequent, remaining
+;;
+
+let many parser =
+  let inner input = Success (parse_zero_or_more parser input) in
+  Parser inner
+;;
