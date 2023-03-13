@@ -18,7 +18,19 @@ module Test_Parsers = struct
     ()
   ;;
 
-  let tests = "Parsers", [ test_case "parse_char" `Quick test_parse_char ]
+  let test_parse_int () =
+    match Utils.run Parsers.parse_int "111ABC" with
+    | Success (111, "ABC") -> ()
+    | Failure msg -> failwith msg
+    | _ -> failwith "_failure_parse"
+  ;;
+
+  let tests =
+    ( "Parsers"
+    , [ test_case "parse_char" `Quick test_parse_char
+      ; test_case "parse_int" `Quick test_parse_int
+      ] )
+  ;;
 end
 
 module Test_Combinators = struct

@@ -114,3 +114,5 @@ let many1 parser =
   in
   Parser inner
 ;;
+
+let option x = or_else (map x ~f:(fun x -> Some x)) (return None)
