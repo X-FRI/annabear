@@ -19,10 +19,19 @@ module Test_Parsers = struct
   ;;
 
   let test_parse_int () =
-    match Utils.run Parsers.parse_int "111ABC" with
-    | Success (111, "ABC") -> ()
-    | Failure msg -> failwith msg
-    | _ -> failwith "_failure_parse"
+    let _positive =
+      match Utils.run Parsers.parse_int "111ABC" with
+      | Success (111, "ABC") -> ()
+      | Failure msg -> failwith msg
+      | _ -> failwith "_failure_parse"
+    in
+    let _negative =
+      match Utils.run Parsers.parse_int "-111ABC" with
+      | Success (-111, "ABC") -> ()
+      | Failure msg -> failwith msg
+      | _ -> failwith "_failure_parse"
+    in
+    ()
   ;;
 
   let tests =
@@ -178,6 +187,20 @@ module Test_Combinators = struct
     ()
   ;;
 
+  let test_option () =
+    match
+      Utils.run
+        (Combinators.and_then
+           (Combinators.any_of
+              (List.init 10 ~f:(fun n -> Char.of_int (n + 48) |> Option.value_exn)))
+           (Combinators.option (Parsers.parse_char ';')))
+        "1;"
+    with
+    | Success (('1', Some ';'), "") -> ()
+    | Failure err -> failwith err
+    | _ -> failwith "_failure_parse"
+  ;;
+
   let tests =
     ( "Combinators"
     , [ test_case "and_then" `Quick test_and_then
@@ -188,6 +211,7 @@ module Test_Combinators = struct
       ; test_case "parse string" `Quick test_parse_string
       ; test_case "many" `Quick test_many
       ; test_case "many1" `Quick test_many1
+      ; test_case "option" `Quick test_option
       ] )
   ;;
 end

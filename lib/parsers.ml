@@ -38,10 +38,16 @@ let parse_string str =
 ;;
 
 let parse_int =
-  Combinators.any_of (List.init 10 ~f:(fun n -> Char.of_int (n + 48) |> Option.value_exn))
-  |> Combinators.many1
-  |> Combinators.map ~f:(fun digit_list ->
-       digit_list |> String.of_char_list |> Int.of_string)
+  Combinators.and_then
+    (Combinators.option (parse_char '-'))
+    (Combinators.any_of
+       (List.init 10 ~f:(fun n -> Char.of_int (n + 48) |> Option.value_exn))
+    |> Combinators.many1)
+  |> Combinators.map ~f:(fun (sign, digit_list) ->
+       let digit = digit_list |> String.of_char_list |> Int.of_string in
+       match sign with
+       | Some _ -> -digit
+       | None -> digit)
 ;;
 
 let parse_char = parse_char
