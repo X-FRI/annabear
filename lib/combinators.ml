@@ -65,24 +65,7 @@ let return x =
 ;;
 
 let apply ~f x = and_then f x |> map ~f:(fun (f, x) -> f x)
-
-module O = struct
-  let ( >>> ) = and_then
-  let ( <|> ) = or_else
-  let ( <-> ) f x = map ~f x
-  let ( |-> ) x f = map ~f x
-  let ( --> ) f x = apply ~f x
-end
-
-let lift2 f x y = O.(return f --> x --> y)
-
-module Int = struct
-  let add = lift2 ( + )
-end
-
-module String = struct
-  let starts_with = lift2 (fun prefix str -> String.is_prefix ~prefix str)
-end
+let lift2 f x y = x |> apply ~f:(return f) |> fun x -> apply ~f:x y
 
 let rec sequence parsers =
   let cons = lift2 (fun h t -> h :: t) in
@@ -116,3 +99,25 @@ let many1 parser =
 ;;
 
 let option x = or_else (map x ~f:(fun x -> Some x)) (return None)
+
+module O = struct
+  let ( >&> ) = and_then
+  let ( <|> ) = or_else
+  let ( <-> ) f x = map ~f x
+  let ( |-> ) x f = map ~f x
+  let ( --> ) f x = apply ~f x
+
+  (** Keep only the result of the left side parser. *)
+  let ( >& ) x y = x >&> y |-> fun (a, _) -> a
+
+  (** Keep only the result of the right side parser *)
+  let ( &> ) x y = x >&> y |-> fun (_, b) -> b
+end
+
+module Int = struct
+  let add = lift2 ( + )
+end
+
+module String = struct
+  let starts_with = lift2 (fun prefix str -> String.is_prefix ~prefix str)
+end

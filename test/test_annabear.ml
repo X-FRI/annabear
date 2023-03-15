@@ -34,10 +34,41 @@ module Test_Parsers = struct
     ()
   ;;
 
+  let test_parse_digit_then_semicolon () =
+    let _ =
+      match
+        Utils.run
+          Combinators.O.(
+            Combinators.any_of
+              (List.init 10 ~f:(fun n -> Char.of_int (n + 48) |> Option.value_exn))
+            >& Combinators.option (Parsers.parse_char ';'))
+          "1;"
+      with
+      | Success ('1', "") -> ()
+      | Failure msg -> failwith msg
+      | _ -> failwith "_failure_parse"
+    in
+    let _ =
+      match
+        Utils.run
+          Combinators.O.(
+            Combinators.any_of
+              (List.init 10 ~f:(fun n -> Char.of_int (n + 48) |> Option.value_exn))
+            >& Combinators.option (Parsers.parse_char ';'))
+          "1"
+      with
+      | Success ('1', "") -> ()
+      | Failure msg -> failwith msg
+      | _ -> failwith "_failure_parse"
+    in
+    ()
+  ;;
+
   let tests =
     ( "Parsers"
     , [ test_case "parse_char" `Quick test_parse_char
       ; test_case "parse_int" `Quick test_parse_int
+      ; test_case "parse_digit_then_semicolon" `Quick test_parse_digit_then_semicolon
       ] )
   ;;
 end
@@ -135,8 +166,8 @@ module Test_Combinators = struct
       Utils.run
         Combinators.O.(
           Parsers.parse_digit
-          >>> Parsers.parse_digit
-          >>> Parsers.parse_digit
+          >&> Parsers.parse_digit
+          >&> Parsers.parse_digit
           |-> (fun ((c1, c2), c3) -> String.of_char_list [ c1; c2; c3 ])
           |-> Int.of_string)
         "123A"
