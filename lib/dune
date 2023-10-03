@@ -1,5 +1,0 @@
-(library
- (public_name annabear)
- (name annabear)
- (flags (:standard -w -33))
- (libraries core))
